@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.0.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.0.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.ico?v=7.0.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.ico?v=7.0.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.0.0" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.0.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="服务器配置好Java环境之后就可以开始安装Tomcat并部署Web应用了。也是上年的文章，一起放上来。">
+<meta name="keywords" content="Java,Linux">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Linux下的Tomcat安装与Web应用部署">
+<meta property="og:url" content="https://reznik.cn/2019/02/Linux下的Tomcat安装与Web应用部署/index.html">
+<meta property="og:site_name" content="Reznik&#39;s Dune">
+<meta property="og:description" content="服务器配置好Java环境之后就可以开始安装Tomcat并部署Web应用了。也是上年的文章，一起放上来。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://pmhxtj4ku.bkt.clouddn.com/Linux%E4%B8%8B%E7%9A%84Tomcat%E5%AE%89%E8%A3%85%E4%B8%8EWeb%E5%BA%94%E7%94%A8%E9%83%A8%E7%BD%B2/tomcat1.png">
+<meta property="og:image" content="http://pmhxtj4ku.bkt.clouddn.com/Linux%E4%B8%8B%E7%9A%84Tomcat%E5%AE%89%E8%A3%85%E4%B8%8EWeb%E5%BA%94%E7%94%A8%E9%83%A8%E7%BD%B2/upload.png">
+<meta property="og:image" content="http://pmhxtj4ku.bkt.clouddn.com/Linux%E4%B8%8B%E7%9A%84Tomcat%E5%AE%89%E8%A3%85%E4%B8%8EWeb%E5%BA%94%E7%94%A8%E9%83%A8%E7%BD%B2/tomcat2.png">
+<meta property="og:image" content="http://pmhxtj4ku.bkt.clouddn.com/Linux%E4%B8%8B%E7%9A%84Tomcat%E5%AE%89%E8%A3%85%E4%B8%8EWeb%E5%BA%94%E7%94%A8%E9%83%A8%E7%BD%B2/startup.png">
+<meta property="og:image" content="http://pmhxtj4ku.bkt.clouddn.com/Linux%E4%B8%8B%E7%9A%84Tomcat%E5%AE%89%E8%A3%85%E4%B8%8EWeb%E5%BA%94%E7%94%A8%E9%83%A8%E7%BD%B2/shutdown.png">
+<meta property="og:image" content="http://pmhxtj4ku.bkt.clouddn.com/Linux%E4%B8%8B%E7%9A%84Tomcat%E5%AE%89%E8%A3%85%E4%B8%8EWeb%E5%BA%94%E7%94%A8%E9%83%A8%E7%BD%B2/tomcat_installed.png">
+<meta property="og:image" content="http://pmhxtj4ku.bkt.clouddn.com/Linux%E4%B8%8B%E7%9A%84Tomcat%E5%AE%89%E8%A3%85%E4%B8%8EWeb%E5%BA%94%E7%94%A8%E9%83%A8%E7%BD%B2/war.png">
+<meta property="og:image" content="http://pmhxtj4ku.bkt.clouddn.com/Linux%E4%B8%8B%E7%9A%84Tomcat%E5%AE%89%E8%A3%85%E4%B8%8EWeb%E5%BA%94%E7%94%A8%E9%83%A8%E7%BD%B2/war2.png">
+<meta property="og:image" content="http://pmhxtj4ku.bkt.clouddn.com/Linux%E4%B8%8B%E7%9A%84Tomcat%E5%AE%89%E8%A3%85%E4%B8%8EWeb%E5%BA%94%E7%94%A8%E9%83%A8%E7%BD%B2/success.png">
+<meta property="og:image" content="http://pmhxtj4ku.bkt.clouddn.com/Linux%E4%B8%8B%E7%9A%84Tomcat%E5%AE%89%E8%A3%85%E4%B8%8EWeb%E5%BA%94%E7%94%A8%E9%83%A8%E7%BD%B2/folder.png">
+<meta property="og:updated_time" content="2019-02-28T15:46:07.584Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Linux下的Tomcat安装与Web应用部署">
+<meta name="twitter:description" content="服务器配置好Java环境之后就可以开始安装Tomcat并部署Web应用了。也是上年的文章，一起放上来。">
+<meta name="twitter:image" content="http://pmhxtj4ku.bkt.clouddn.com/Linux%E4%B8%8B%E7%9A%84Tomcat%E5%AE%89%E8%A3%85%E4%B8%8EWeb%E5%BA%94%E7%94%A8%E9%83%A8%E7%BD%B2/tomcat1.png">
+
+
+
+
+
+
+  <link rel="canonical" href="https://reznik.cn/2019/02/Linux下的Tomcat安装与Web应用部署/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Linux下的Tomcat安装与Web应用部署 | Reznik's Dune</title>
+  
+
+
+
+
+  <script async src="//www.googletagmanager.com/gtag/js?id=UA-134722677-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'UA-134722677-1');
+  </script>
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Reznik's Dune</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://reznik.cn/2019/02/Linux下的Tomcat安装与Web应用部署/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Reznik">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Reznik's Dune">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Linux下的Tomcat安装与Web应用部署
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-02-28 22:46:48 / 修改时间：23:46:07" itemprop="dateCreated datePublished" datetime="2019-02-28T22:46:48+08:00">2019-02-28</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/技术/" itemprop="url" rel="index"><span itemprop="name">技术</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>服务器配置好Java环境之后就可以开始安装Tomcat并部署Web应用了。也是上年的文章，一起放上来。<br><a id="more"></a></p>
+<h2 id="Tomcat安装"><a href="#Tomcat安装" class="headerlink" title="Tomcat安装"></a>Tomcat安装</h2><h3 id="准备好合适版本的Tomcat"><a href="#准备好合适版本的Tomcat" class="headerlink" title="准备好合适版本的Tomcat"></a>准备好合适版本的Tomcat</h3><ul>
+<li>网上有一种笼统的说法：Tomcat版本应该<strong>大于等于</strong>JDK版本。Tomcat官网上有<a href="https://tomcat.apache.org/whichversion.html" target="_blank" rel="noopener">Tomcat版本说明</a>，简单来说选择最新版本即可。</li>
+<li>一般来说我们选择Binary Distributions中Core下的版本进行下载，注意下载后缀名为tar.gz的文件。关于Core和Deployer的区别可以参考<a href="https://www.cnblogs.com/guxia/p/6678184.html" target="_blank" rel="noopener">这篇博文</a></li>
+<li>在Linux下创建存放Tomcat的目录，并使用FTP工具将Tomcat安装包放进去。我使用的是WinSCP，注意传输类型最好改为<strong>二进制</strong>，以免解压失败<br><code>mkdir /usr/local/tomcat</code>  </li>
+</ul>
+<p><img src="http://pmhxtj4ku.bkt.clouddn.com/Linux%E4%B8%8B%E7%9A%84Tomcat%E5%AE%89%E8%A3%85%E4%B8%8EWeb%E5%BA%94%E7%94%A8%E9%83%A8%E7%BD%B2/tomcat1.png" alt></p>
+<p><img src="http://pmhxtj4ku.bkt.clouddn.com/Linux%E4%B8%8B%E7%9A%84Tomcat%E5%AE%89%E8%A3%85%E4%B8%8EWeb%E5%BA%94%E7%94%A8%E9%83%A8%E7%BD%B2/upload.png" alt></p>
+<ul>
+<li>安装包解压<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cd /usr/local/tomcat</span><br><span class="line">tar -zxvf apache-tomcat-9.0.8.tar.gz</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h3 id="配置端口"><a href="#配置端口" class="headerlink" title="配置端口"></a>配置端口</h3><ul>
+<li>Tomcat默认端口是8080，有可能与服务器上的其他应用冲突，因此我们可以修改conf/server.xml文件，配置到其他端口上<br><code>vim /usr/local/tomcat/apache-tomcat-9.0.8/conf/server.xml</code>   </li>
+<li>找到Connector元素，将port改为你要的端口，这里我改成了8081</li>
+</ul>
+<p><img src="http://pmhxtj4ku.bkt.clouddn.com/Linux%E4%B8%8B%E7%9A%84Tomcat%E5%AE%89%E8%A3%85%E4%B8%8EWeb%E5%BA%94%E7%94%A8%E9%83%A8%E7%BD%B2/tomcat2.png" alt></p>
+<h3 id="启动或关闭Tomcat服务"><a href="#启动或关闭Tomcat服务" class="headerlink" title="启动或关闭Tomcat服务"></a>启动或关闭Tomcat服务</h3><ul>
+<li>启动Tomcat<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cd /usr/local/tomcat/apache-tomcat-9.0.8/bin</span><br><span class="line">./startup.sh</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p><img src="http://pmhxtj4ku.bkt.clouddn.com/Linux%E4%B8%8B%E7%9A%84Tomcat%E5%AE%89%E8%A3%85%E4%B8%8EWeb%E5%BA%94%E7%94%A8%E9%83%A8%E7%BD%B2/startup.png" alt></p>
+<ul>
+<li>关闭Tomcat<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cd /usr/local/tomcat/apache-tomcat-9.0.8/bin</span><br><span class="line">./shutdown.sh</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p><img src="http://pmhxtj4ku.bkt.clouddn.com/Linux%E4%B8%8B%E7%9A%84Tomcat%E5%AE%89%E8%A3%85%E4%B8%8EWeb%E5%BA%94%E7%94%A8%E9%83%A8%E7%BD%B2/shutdown.png" alt></p>
+<h3 id="访问Tomcat"><a href="#访问Tomcat" class="headerlink" title="访问Tomcat"></a>访问Tomcat</h3><ul>
+<li>访问<a href="http://ip地址:端口号/" target="_blank" rel="noopener">http://ip地址:端口号/</a> ，如果能看到下面的页面说明Tomcat安装成功。</li>
+</ul>
+<p><img src="http://pmhxtj4ku.bkt.clouddn.com/Linux%E4%B8%8B%E7%9A%84Tomcat%E5%AE%89%E8%A3%85%E4%B8%8EWeb%E5%BA%94%E7%94%A8%E9%83%A8%E7%BD%B2/tomcat_installed.png" alt></p>
+<ul>
+<li>我之前使用OpenJDK 9时Tomcat 9.0就无法启动，按照网上经验，换用JDK之后就能成功使用了。有类似问题的话可以尝试换用JDK。</li>
+</ul>
+<h2 id="Web应用部署"><a href="#Web应用部署" class="headerlink" title="Web应用部署"></a>Web应用部署</h2><ul>
+<li>Tomcat安装完后就可以在上面部署Web应用了。</li>
+</ul>
+<h3 id="将项目打包成War包"><a href="#将项目打包成War包" class="headerlink" title="将项目打包成War包"></a>将项目打包成War包</h3><ul>
+<li>以Eclipse为例，右击项目-&gt;Export-&gt;WAR file，然后选择导出War包的路径</li>
+</ul>
+<p><img src="http://pmhxtj4ku.bkt.clouddn.com/Linux%E4%B8%8B%E7%9A%84Tomcat%E5%AE%89%E8%A3%85%E4%B8%8EWeb%E5%BA%94%E7%94%A8%E9%83%A8%E7%BD%B2/war.png" alt></p>
+<p><img src="http://pmhxtj4ku.bkt.clouddn.com/Linux%E4%B8%8B%E7%9A%84Tomcat%E5%AE%89%E8%A3%85%E4%B8%8EWeb%E5%BA%94%E7%94%A8%E9%83%A8%E7%BD%B2/war2.png" alt></p>
+<h3 id="上传War包和相关Jar包"><a href="#上传War包和相关Jar包" class="headerlink" title="上传War包和相关Jar包"></a>上传War包和相关Jar包</h3><ul>
+<li>使用FTP工具上传War包至Tomcat的webapps目录下，并尝试访问，Tomcat会自动解析War包。若解析成功，则能运行Web应用。webapps目录下也会有同名的文件夹。</li>
+</ul>
+<p><img src="http://pmhxtj4ku.bkt.clouddn.com/Linux%E4%B8%8B%E7%9A%84Tomcat%E5%AE%89%E8%A3%85%E4%B8%8EWeb%E5%BA%94%E7%94%A8%E9%83%A8%E7%BD%B2/success.png" alt></p>
+<p><img src="http://pmhxtj4ku.bkt.clouddn.com/Linux%E4%B8%8B%E7%9A%84Tomcat%E5%AE%89%E8%A3%85%E4%B8%8EWeb%E5%BA%94%E7%94%A8%E9%83%A8%E7%BD%B2/folder.png" alt></p>
+<ul>
+<li><p>有些已添加到本地Tomcat上的Jar包也要记得将其添加到服务器Tomcat的lib目录下。</p>
+</li>
+<li><p>之前遇到过Tomcat返回404 Not Found的错误，原因是Tomcat没有正常解析War包。错误出在传输时使用了文本格式，换用二进制格式重新传输后解析成功。</p>
+</li>
+</ul>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Java/" rel="tag"># Java</a>
+          
+            <a href="/tags/Linux/" rel="tag"># Linux</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/02/Linux下的Java环境配置/" rel="next" title="Linux下的Java环境配置">
+                <i class="fa fa-chevron-left"></i> Linux下的Java环境配置
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="Reznik">
+            
+              <p class="site-author-name" itemprop="name">Reznik</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">5</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">3</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">3</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://weibo.com/zizhao1996" title="Weibo &rarr; https://weibo.com/zizhao1996" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Tomcat安装"><span class="nav-number">1.</span> <span class="nav-text">Tomcat安装</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#准备好合适版本的Tomcat"><span class="nav-number">1.1.</span> <span class="nav-text">准备好合适版本的Tomcat</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置端口"><span class="nav-number">1.2.</span> <span class="nav-text">配置端口</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#启动或关闭Tomcat服务"><span class="nav-number">1.3.</span> <span class="nav-text">启动或关闭Tomcat服务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#访问Tomcat"><span class="nav-number">1.4.</span> <span class="nav-text">访问Tomcat</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Web应用部署"><span class="nav-number">2.</span> <span class="nav-text">Web应用部署</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#将项目打包成War包"><span class="nav-number">2.1.</span> <span class="nav-text">将项目打包成War包</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#上传War包和相关Jar包"><span class="nav-number">2.2.</span> <span class="nav-text">上传War包和相关Jar包</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">  <a href="http://www.miitbeian.gov.cn" rel="noopener" target="_blank">粤ICP备17096004号 </a>&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Reznik</span>
+
+  
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=7.0.0"></script>
+
+  <script src="/js/src/motion.js?v=7.0.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=7.0.0"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=7.0.0"></script>
+
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=7.0.0"></script>
+<script src="/js/src/post-details.js?v=7.0.0"></script>
+
+
+
+  
+
+
+  <script src="/js/src/bootstrap.js?v=7.0.0"></script>
+
+
+
+  
+
+
+  
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
